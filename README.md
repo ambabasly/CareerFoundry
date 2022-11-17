@@ -7,3 +7,5 @@
 - copy api_key from ipstack.com
 
 - for some reasons the api location is not working on mac, but works well on ubuntu
+
+- there was not enough time for better styling
