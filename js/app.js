@@ -1,35 +1,89 @@
 // api endpoint::get
-const BASE_URL = 'https://private-e05942-courses22.apiary-mock.com/courses'
-const BASE_URL_2 = 'https://private-e05942-courses22.apiary-mock.com/courses/'
+const baseUrl = "https://private-e05942-courses22.apiary-mock.com/courses";
 
-const fetchCourse = async (base_url) => {
-  let response = await fetch(base_url)
+const fetchCourses = async () => {
+  try {
+    let response = await fetch(baseUrl);
 
-  // fetch data using fetch api
-  let courses = await response.json()
-  console.log(courses)
-  show(courses)
-}
+    if (!response.ok) {
+      throw new Error(`Failed to fetch courses:  ${response.status}`);
+    }
 
-// fetch seletected course data 
-const fetchSelectedCourse = async (courseId) => {
-  let response = await fetch(BASE_URL_2 + courseId)
-  let course = await response.json()
-  console.log(course)
-}
+    return await response.json();
+  } catch (e) {}
+};
 
-fetchCourse(BASE_URL)
+// fetch data for courses selected
+const fetchCourseSelected = async (courseId) => {
+  try {
+    let response = await fetch(`${baseUrl}/${courseId}`);
 
-const show = (courses) => {
-  let tab = ''
-  const courseSelected = document.getElementById('course')
-  courses.map(
-    (item) =>
-      (tab += `<div>
-    <li id="course-item">title: ${item.title} </li>
-    <li>slug: ${item.slug}</li>
-    <li>date: ${item.next_start_formatted}</li> 
-    <li>url: <a href=${item.url}>${item.title}</a></li></div><hr/>`),
-  ),
-    (document.getElementById('courses').innerHTML = tab)
-}
+    if (!response.ok) {
+      throw new Error(`Failed to fetch selected course: ${response.status}`);
+    }
+
+    let data = await response.json().then((data) => {
+      showCourseSelected(data);
+    });
+  } catch (e) {}
+};
+
+// get current location of user
+const fetchUserLocation = async () => {
+  let response = await fetch(
+    `http://api.ipstack.com/check?access_key=c3c591964f41a4d13d7900615a9cae67`
+  );
+  return await response.json();
+};
+
+// fetch all courses
+const listCourses = (postContainerElement) => {
+  postContainerElement = document.getElementById(postContainerElement);
+  if (!postContainerElement) {
+    return;
+  }
+
+  fetchCourses()
+    .then((courses) => {
+      if (!courses) {
+        postContainerElement.innerHTML = "No courses";
+        return;
+      }
+
+      for (const course of courses) {
+        postContainerElement.appendChild(postElement(course));
+      }
+    })
+    .catch((e) => {});
+};
+
+listCourses("courses");
+
+const postElement = (course) => {
+  const anchorElement = document.createElement("button");
+  const courseId = course.slug;
+  anchorElement.addEventListener("click", () => {
+    fetchCourseSelected(courseId);
+  });
+  anchorElement.innerText = course.slug;
+  const postTitleElement = document.createElement("h3");
+  postTitleElement.appendChild(anchorElement);
+  return postTitleElement;
+};
+
+const showCourseSelected = (course) => {
+  let currencyType = 0;
+  fetchUserLocation().then((location) => {
+    if (location.continent_name === "Europe") {
+      return currencyType === 1;
+    } else {
+      return currencyType === 0;
+    }
+  });
+  let tab = `
+  <h2>${course.description}</h2>
+  <p>date: ${course.start_dates[0]}</p>
+  <p>${course.prices[currencyType].currency}: ${course.prices[currencyType].amount}</p>`;
+
+  document.getElementById("course").innerHTML = tab;
+};
