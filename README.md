@@ -1,6 +1,6 @@
-# CareerFoundry
-
-## Clone project with ``git clone the_code_url``
+# Documentation 
+---
+- Clone project with ``git clone the_code_url``
 
 - Create ipstack.com account 
 
