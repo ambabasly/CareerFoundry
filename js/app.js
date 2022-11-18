@@ -31,7 +31,7 @@ const fetchCourseSelected = async (courseId) => {
 // get current location of user
 const fetchUserLocation = async () => {
   let response = await fetch(
-    `http://api.ipstack.com/check?access_key=c3c591964f41a4d13d7900615a9cae67`
+    `http://api.ipstack.com/102.128.165.0?access_key=c3c591964f41a4d13d7900615a9cae67`
   );
   return await response.json();
 };
@@ -75,15 +75,15 @@ const showCourseSelected = (course) => {
   let currencyType = 0;
   fetchUserLocation().then((location) => {
     if (location.continent_name === "Europe") {
-      return currencyType === 1;
+      currencyType = 1;
     } else {
-      return currencyType === 0;
+      currencyType = 0;
     }
-  });
-  let tab = `
+
+    let tab = `
   <h2>${course.description}</h2>
   <p>date: ${course.start_dates[0]}</p>
   <p>${course.prices[currencyType].currency}: ${course.prices[currencyType].amount}</p>`;
-
-  document.getElementById("course").innerHTML = tab;
+    document.getElementById("course").innerHTML = tab;
+  });
 };
